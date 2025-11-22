@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import logoEmpresa from './assets/LogoEmpresa.png';
 
-const API_BASE = 'https://pedido-velitas-variedades-angel2.onrender.com';
+const API_BASE = 'https://pedido-velitas-variedades-angel-3.onrender.com';
 
 function App() {
   const isAdmin = window.location.pathname === '/admin';
