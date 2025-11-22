@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './App.css';
 import logoEmpresa from './assets/LogoEmpresa.png';
 
+const API_BASE = 'https://pedido-velitas-variedades-angel2.onrender.com';
+
 function App() {
   const isAdmin = window.location.pathname === '/admin';
   const velaImg = require('./assets/Gemini_Generated_Image_3ytw0z3ytw0z3ytw.png');
@@ -42,7 +44,7 @@ function App() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/clientes/telefono/${encodeURIComponent(limpio)}`,
+        `${API_BASE}/clientes/telefono/${encodeURIComponent(limpio)}`,
       );
       if (!res.ok) return;
 
@@ -96,7 +98,7 @@ function App() {
     };
 
     try {
-      const res = await fetch('http://localhost:3000/pedidos', {
+      const res = await fetch(`${API_BASE}/pedidos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -330,7 +332,7 @@ function AdminPedidos() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/admin/pedidos?${params.toString()}`,
+        `${API_BASE}/admin/pedidos?${params.toString()}`,
       );
       if (!res.ok) {
         setMensaje('Error al consultar pedidos');
@@ -384,7 +386,7 @@ function AdminPedidos() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/admin/pedidos/${pedidoSeleccionado.id}/confirmar-paquete`,
+        `${API_BASE}/admin/pedidos/${pedidoSeleccionado.id}/confirmar-paquete`,
         {
           method: 'POST',
           headers: {
