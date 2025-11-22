@@ -428,7 +428,7 @@ function AdminPedidos() {
               id="clave-admin"
               type="password"
               className="text-input"
-              placeholder="Ingresa la clave (514022)"
+              placeholder="Ingresa la clave"
               value={clave}
               onChange={(e) => setClave(e.target.value)}
             />
