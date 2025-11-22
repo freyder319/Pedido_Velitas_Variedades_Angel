@@ -8,14 +8,13 @@ import { Vela } from './entities/vela.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      database: 'velitas_db',
-      entities: [Pedido, Vela],
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      autoLoadEntities: true,
       synchronize: true,
+      ssl: {
+        rejectUnauthorized: false,
+      },
     }),
     TypeOrmModule.forFeature([Pedido, Vela]),
   ],
