@@ -347,6 +347,8 @@ function App() {
                         { label: 'Azul', value: 'Azul', className: 'color-circle-azul' },
                         { label: 'Dorado', value: 'Dorado', className: 'color-circle-dorado' },
                         { label: 'Verde', value: 'Verde', className: 'color-circle-verde' },
+                        { label: 'Fucsia', value: 'Fucsia', className: 'color-circle-fucsia' },
+                        { label: 'Plateado', value: 'Plateado', className: 'color-circle-plateado' },
                       ].map((opcion) => {
                         const seleccionado =
                           coloresEscarchaPorPaquete[indexPaquete] === opcion.value;

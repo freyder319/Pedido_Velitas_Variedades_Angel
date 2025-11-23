@@ -462,6 +462,14 @@ body {
   background: #43a047;
 }
 
+.color-circle-fucsia {
+  background: #e91e63;
+}
+
+.color-circle-plateado {
+  background: linear-gradient(135deg, #eeeeee, #bdbdbd);
+}
+
 .color-escarcha-label {
   font-weight: 500;
 }
