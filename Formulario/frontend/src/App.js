@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
 import './App.css';
 import logoEmpresa from './assets/LogoEmpresa.png';
+import tipoVela1 from './assets/Tipos_Velas/tipo1.jpg';
+import tipoVela2 from './assets/Tipos_Velas/Tipo2.jpg';
+import tipoVela3 from './assets/Tipos_Velas/Tipo3.jpg';
+import tipoVela4 from './assets/Tipos_Velas/Tipo 4.jpg';
+import tipoVela5 from './assets/Tipos_Velas/Tipo5.jpg';
 
 const API_BASE = 'https://pedido-velitas-variedades-angel-3.onrender.com';
+
+
+
+
 
 function App() {
   const isAdmin = window.location.pathname === '/admin';
@@ -12,8 +21,25 @@ function App() {
   const [paquetes, setPaquetes] = useState([
     Array.from({ length: 10 }, () => ''),
   ]);
+  const [tiposVelaPorPaquete, setTiposVelaPorPaquete] = useState([null]);
   const [showErrors, setShowErrors] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const tiposVelas = [
+    { id: 1, nombre: 'Degrade', imagen: tipoVela1 },
+    { id: 2, nombre: 'Blanca', imagen: tipoVela2 },
+    { id: 3, nombre: 'Esccarcha', imagen: tipoVela3 },
+    { id: 4, nombre: 'Arcoiris', imagen: tipoVela4 },
+    { id: 5, nombre: 'Colores', imagen: tipoVela5 },
+  ];
+
+  const seleccionarTipoParaPaquete = (indexPaquete, tipoId) => {
+    setTiposVelaPorPaquete((prev) => {
+      const copia = [...prev];
+      copia[indexPaquete] = tipoId;
+      return copia;
+    });
+  };
 
   const handleChangeVela = (indexPaquete, indexVela, value) => {
     setPaquetes((prev) =>
@@ -27,12 +53,19 @@ function App() {
 
   const handleAddPaquete = () => {
     setPaquetes((prev) => [...prev, Array.from({ length: 10 }, () => '')]);
+    setTiposVelaPorPaquete((prev) => [...prev, null]);
   };
 
   const handleRemovePaquete = (indexPaquete) => {
     setPaquetes((prev) => {
       if (prev.length === 1) {
         return [Array.from({ length: 10 }, () => '')];
+      }
+      return prev.filter((_, i) => i !== indexPaquete);
+    });
+    setTiposVelaPorPaquete((prev) => {
+      if (prev.length === 1) {
+        return [null];
       }
       return prev.filter((_, i) => i !== indexPaquete);
     });
@@ -77,13 +110,24 @@ function App() {
       });
     });
 
+    tiposVelaPorPaquete.forEach((tipo) => {
+      if (tipo === null || tipo === undefined) {
+        hasEmpty = true;
+      }
+    });
+
     if (hasEmpty) {
       setShowErrors(true);
 
       setTimeout(() => {
-        const firstError = document.querySelector('.text-input-error');
+        let firstError = document.querySelector('.text-input-error');
+        if (!firstError) {
+          firstError = document.querySelector('.tipo-vela-error');
+        }
         if (firstError) {
-          firstError.focus();
+          if (firstError.focus) {
+            firstError.focus();
+          }
           firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 0);
@@ -91,10 +135,17 @@ function App() {
       return;
     }
 
+    const tiposPaquetes = paquetes.map((_, indexPaquete) => {
+      const tipoId = tiposVelaPorPaquete[indexPaquete];
+      const tipo = tiposVelas.find((t) => t.id === tipoId);
+      return tipo ? tipo.nombre : null;
+    });
+
     const payload = {
       nombreCompleto,
       telefono,
       paquetes,
+      tiposPaquetes,
     };
 
     try {
@@ -113,6 +164,7 @@ function App() {
       setNombreCompleto('');
       setTelefono('');
       setPaquetes([Array.from({ length: 10 }, () => '')]);
+      setTiposVelaPorPaquete([null]);
       setShowErrors(false);
       setShowSuccessModal(true);
     } catch (err) {
@@ -201,6 +253,46 @@ function App() {
                 >
                   Eliminar paquete
                 </button>
+              </div>
+
+              <div className="field-group">
+                <label className="field-label">Tipo de vela para este paquete</label>
+                <div className="tipos-vela-grid">
+                  {tiposVelas.map((tipo) => (
+                    <button
+                      key={tipo.id}
+                      type="button"
+                      className={`tipo-vela-card ${
+                        tiposVelaPorPaquete[indexPaquete] === tipo.id
+                          ? 'tipo-vela-card-selected'
+                          : ''
+                      } ${
+                        showErrors &&
+                        (tiposVelaPorPaquete[indexPaquete] === null ||
+                          tiposVelaPorPaquete[indexPaquete] === undefined)
+                          ? 'tipo-vela-card-error'
+                          : ''
+                      }`}
+                      onClick={() => seleccionarTipoParaPaquete(indexPaquete, tipo.id)}
+                    >
+                      <div className="tipo-vela-imagen-wrapper">
+                        <img
+                          src={tipo.imagen}
+                          alt={tipo.nombre}
+                          className="tipo-vela-imagen"
+                        />
+                      </div>
+                      <span className="tipo-vela-nombre">{tipo.nombre}</span>
+                    </button>
+                  ))}
+                </div>
+                {showErrors &&
+                  (tiposVelaPorPaquete[indexPaquete] === null ||
+                    tiposVelaPorPaquete[indexPaquete] === undefined) && (
+                    <p className="tipo-vela-error">
+                      Debes seleccionar un tipo de vela para este paquete.
+                    </p>
+                  )}
               </div>
 
               <div id="candles-container">
@@ -416,6 +508,11 @@ function AdminPedidos() {
       ? obtenerPaquetesDePedido(pedidoSeleccionado)[paqueteSeleccionado]
       : [];
 
+  const tipoVelaPaqueteSeleccionado =
+    paquetesSeleccionados.length > 0
+      ? paquetesSeleccionados[0].tipoVela || 'Sin tipo de vela'
+      : 'Sin tipo de vela';
+
   return (
     <div className="page admin-page">
       <div className="admin-container">
@@ -522,6 +619,9 @@ function AdminPedidos() {
                   Pedido #{pedidoSeleccionado.id} - {pedidoSeleccionado.nombreCompleto} - Paquete{' '}
                   {paqueteSeleccionado + 1}
                 </h2>
+                <p>
+                  Tipo de vela: {tipoVelaPaqueteSeleccionado}
+                </p>
                 <button
                   type="button"
                   className="submit-btn admin-confirmar-paquete-btn"

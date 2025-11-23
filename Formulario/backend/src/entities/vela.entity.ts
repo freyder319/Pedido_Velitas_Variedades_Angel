@@ -9,6 +9,9 @@ export class Vela {
   @Column()
   texto: string;
 
+  @Column({ nullable: true })
+  tipoVela: string | null;
+
   @Column({ default: false })
   confirmado: boolean;
 

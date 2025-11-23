@@ -8,6 +8,7 @@ export interface CrearPedidoDto {
   nombreCompleto: string;
   telefono: string;
   paquetes: string[][];
+  tiposPaquetes?: (string | null)[];
 }
 
 @Injectable()
@@ -20,8 +21,24 @@ export class AppService {
   ) {}
 
   async crearPedido(dto: CrearPedidoDto) {
-    const todasLasVelas = dto.paquetes.flat().filter((t) => t.trim());
-    if (todasLasVelas.length === 0) {
+    const nuevasVelas: Vela[] = [];
+
+    dto.paquetes.forEach((paquete, indexPaquete) => {
+      const tipoVelaPaquete = dto.tiposPaquetes?.[indexPaquete] ?? null;
+
+      paquete.forEach((texto) => {
+        if (!texto.trim()) {
+          return;
+        }
+
+        const vela = new Vela();
+        vela.texto = texto;
+        vela.tipoVela = tipoVelaPaquete || null;
+        nuevasVelas.push(vela);
+      });
+    });
+
+    if (nuevasVelas.length === 0) {
       return {
         mensaje: 'No se recibieron velas para guardar',
       };
@@ -43,11 +60,8 @@ export class AppService {
     }
 
     // Crear nuevas velas asociadas a ese pedido (no se repite el pedido)
-    const nuevasVelas = todasLasVelas.map((texto) => {
-      const vela = new Vela();
-      vela.texto = texto;
+    nuevasVelas.forEach((vela) => {
       vela.pedido = pedido;
-      return vela;
     });
 
     await this.velaRepo.save(nuevasVelas);
