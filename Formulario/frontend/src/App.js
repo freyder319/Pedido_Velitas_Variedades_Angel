@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import logoEmpresa from './assets/LogoEmpresa.png';
 import tipoVela1 from './assets/Tipos_Velas/tipo1.jpg';
@@ -27,6 +27,20 @@ function App() {
   ]);
   const [showErrors, setShowErrors] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  useEffect(() => {
+    // Título de la pestaña
+    document.title = 'Variedades Angel';
+
+    // Favicon usando el logo de la empresa
+    let link = document.querySelector("link[rel='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = logoEmpresa;
+  }, []);
 
   const tiposVelas = [
     { id: 1, nombre: 'Degrade', imagen: tipoVela1 },
