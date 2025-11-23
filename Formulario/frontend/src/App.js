@@ -22,13 +22,16 @@ function App() {
     Array.from({ length: 10 }, () => ''),
   ]);
   const [tiposVelaPorPaquete, setTiposVelaPorPaquete] = useState([null]);
+  const [coloresEscarchaPorPaquete, setColoresEscarchaPorPaquete] = useState([
+    null,
+  ]);
   const [showErrors, setShowErrors] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const tiposVelas = [
     { id: 1, nombre: 'Degrade', imagen: tipoVela1 },
     { id: 2, nombre: 'Blanca', imagen: tipoVela2 },
-    { id: 3, nombre: 'Esccarcha', imagen: tipoVela3 },
+    { id: 3, nombre: 'Escarcha', imagen: tipoVela3 },
     { id: 4, nombre: 'Arcoiris', imagen: tipoVela4 },
     { id: 5, nombre: 'Colores', imagen: tipoVela5 },
   ];
@@ -37,6 +40,16 @@ function App() {
     setTiposVelaPorPaquete((prev) => {
       const copia = [...prev];
       copia[indexPaquete] = tipoId;
+      return copia;
+    });
+
+    setColoresEscarchaPorPaquete((prev) => {
+      const copia = [...prev];
+      // Al cambiar el tipo, si ya no es escarcha, limpiamos el color
+      const tipoSeleccionado = tiposVelas.find((t) => t.id === tipoId);
+      if (!tipoSeleccionado || tipoSeleccionado.id !== 3) {
+        copia[indexPaquete] = null;
+      }
       return copia;
     });
   };
@@ -54,6 +67,7 @@ function App() {
   const handleAddPaquete = () => {
     setPaquetes((prev) => [...prev, Array.from({ length: 10 }, () => '')]);
     setTiposVelaPorPaquete((prev) => [...prev, null]);
+    setColoresEscarchaPorPaquete((prev) => [...prev, null]);
   };
 
   const handleRemovePaquete = (indexPaquete) => {
@@ -64,6 +78,12 @@ function App() {
       return prev.filter((_, i) => i !== indexPaquete);
     });
     setTiposVelaPorPaquete((prev) => {
+      if (prev.length === 1) {
+        return [null];
+      }
+      return prev.filter((_, i) => i !== indexPaquete);
+    });
+    setColoresEscarchaPorPaquete((prev) => {
       if (prev.length === 1) {
         return [null];
       }
@@ -116,6 +136,16 @@ function App() {
       }
     });
 
+    paquetes.forEach((_, indexPaquete) => {
+      const tipoId = tiposVelaPorPaquete[indexPaquete];
+      if (tipoId === 3) {
+        const color = coloresEscarchaPorPaquete[indexPaquete];
+        if (!color) {
+          hasEmpty = true;
+        }
+      }
+    });
+
     if (hasEmpty) {
       setShowErrors(true);
 
@@ -123,6 +153,9 @@ function App() {
         let firstError = document.querySelector('.text-input-error');
         if (!firstError) {
           firstError = document.querySelector('.tipo-vela-error');
+        }
+        if (!firstError) {
+          firstError = document.querySelector('.color-escarcha-card-error');
         }
         if (firstError) {
           if (firstError.focus) {
@@ -137,8 +170,16 @@ function App() {
 
     const tiposPaquetes = paquetes.map((_, indexPaquete) => {
       const tipoId = tiposVelaPorPaquete[indexPaquete];
-      const tipo = tiposVelas.find((t) => t.id === tipoId);
-      return tipo ? tipo.nombre : null;
+      return tipoId !== null && tipoId !== undefined ? tipoId : null;
+    });
+
+    const coloresPaquetes = paquetes.map((_, indexPaquete) => {
+      const tipoId = tiposVelaPorPaquete[indexPaquete];
+      if (tipoId === 3) {
+        // Si no hay color elegido, se envía Rojo por defecto a la base de datos
+        return coloresEscarchaPorPaquete[indexPaquete] || 'Rojo';
+      }
+      return null;
     });
 
     const payload = {
@@ -146,6 +187,7 @@ function App() {
       telefono,
       paquetes,
       tiposPaquetes,
+      coloresPaquetes,
     };
 
     try {
@@ -293,6 +335,52 @@ function App() {
                       Debes seleccionar un tipo de vela para este paquete.
                     </p>
                   )}
+
+                {tiposVelaPorPaquete[indexPaquete] === 3 && (
+                  <div className="field-group">
+                    <label className="field-label">
+                      Color de la vela escarcha (rojo, azul, dorado o verde)
+                    </label>
+                    <div className="color-escarcha-options">
+                      {[
+                        { label: 'Rojo', value: 'Rojo', className: 'color-circle-rojo' },
+                        { label: 'Azul', value: 'Azul', className: 'color-circle-azul' },
+                        { label: 'Dorado', value: 'Dorado', className: 'color-circle-dorado' },
+                        { label: 'Verde', value: 'Verde', className: 'color-circle-verde' },
+                      ].map((opcion) => {
+                        const seleccionado =
+                          coloresEscarchaPorPaquete[indexPaquete] === opcion.value;
+                        return (
+                          <button
+                            key={opcion.value}
+                            type="button"
+                            className={`color-escarcha-card ${
+                              seleccionado ? 'color-escarcha-card-selected' : ''
+                            } ${
+                              showErrors && !coloresEscarchaPorPaquete[indexPaquete]
+                                ? 'color-escarcha-card-error'
+                                : ''
+                            }`}
+                            onClick={() => {
+                              setColoresEscarchaPorPaquete((prev) => {
+                                const copia = [...prev];
+                                copia[indexPaquete] = opcion.value;
+                                return copia;
+                              });
+                            }}
+                          >
+                            <span
+                              className={`color-circle ${opcion.className}`}
+                            />
+                            <span className="color-escarcha-label">
+                              {opcion.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div id="candles-container">
@@ -508,10 +596,33 @@ function AdminPedidos() {
       ? obtenerPaquetesDePedido(pedidoSeleccionado)[paqueteSeleccionado]
       : [];
 
-  const tipoVelaPaqueteSeleccionado =
-    paquetesSeleccionados.length > 0
-      ? paquetesSeleccionados[0].tipoVela || 'Sin tipo de vela'
-      : 'Sin tipo de vela';
+  const tipoVelaPaqueteSeleccionado = (() => {
+    if (paquetesSeleccionados.length === 0) {
+      return 'Sin tipo de vela';
+    }
+
+    const primeraVela = paquetesSeleccionados[0];
+    const codigo = primeraVela.tipoVela;
+    const color = primeraVela.colorEscarcha;
+
+    if (!codigo) {
+      return 'Sin tipo de vela';
+    }
+
+    let nombre = '';
+    if (codigo === '1') nombre = 'Degrade';
+    else if (codigo === '2') nombre = 'Blanca';
+    else if (codigo === '3') nombre = 'Escarcha';
+    else if (codigo === '4') nombre = 'Arcoiris';
+    else if (codigo === '5') nombre = 'Colores';
+    else nombre = codigo;
+
+    if (codigo === '3' && color) {
+      return `${nombre}(${color})`;
+    }
+
+    return nombre;
+  })();
 
   return (
     <div className="page admin-page">

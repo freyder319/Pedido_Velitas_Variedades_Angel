@@ -12,6 +12,9 @@ export class Vela {
   @Column({ nullable: true })
   tipoVela: string | null;
 
+  @Column({ nullable: true })
+  colorEscarcha: string | null;
+
   @Column({ default: false })
   confirmado: boolean;
 

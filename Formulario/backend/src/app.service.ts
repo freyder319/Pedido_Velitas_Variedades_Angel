@@ -8,7 +8,8 @@ export interface CrearPedidoDto {
   nombreCompleto: string;
   telefono: string;
   paquetes: string[][];
-  tiposPaquetes?: (string | null)[];
+  tiposPaquetes?: (string | number | null)[];
+  coloresPaquetes?: (string | null)[];
 }
 
 @Injectable()
@@ -25,6 +26,12 @@ export class AppService {
 
     dto.paquetes.forEach((paquete, indexPaquete) => {
       const tipoVelaPaquete = dto.tiposPaquetes?.[indexPaquete] ?? null;
+      const colorEscarchaPaquete = dto.coloresPaquetes?.[indexPaquete] ?? null;
+
+      const tipoVelaString =
+        tipoVelaPaquete !== null && tipoVelaPaquete !== undefined
+          ? String(tipoVelaPaquete)
+          : null;
 
       paquete.forEach((texto) => {
         if (!texto.trim()) {
@@ -33,7 +40,11 @@ export class AppService {
 
         const vela = new Vela();
         vela.texto = texto;
-        vela.tipoVela = tipoVelaPaquete || null;
+        vela.tipoVela = tipoVelaString;
+        vela.colorEscarcha =
+          tipoVelaString === '3' && colorEscarchaPaquete
+            ? colorEscarchaPaquete
+            : null;
         nuevasVelas.push(vela);
       });
     });
