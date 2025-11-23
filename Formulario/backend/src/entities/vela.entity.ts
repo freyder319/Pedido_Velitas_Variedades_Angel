@@ -9,10 +9,10 @@ export class Vela {
   @Column()
   texto: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   tipoVela: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   colorEscarcha: string | null;
 
   @Column({ default: false })
